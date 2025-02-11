@@ -3,18 +3,20 @@ import environ
 from datetime import timedelta
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
+env = environ.Env(DEBUG=(bool, False))
+environ.Env.read_env(os.path.join(os.path.dirname(__file__), "..", ".env"))
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = 'django-insecure-zizqwxb+$7gt57sj%w#63ebkrz$n9^0g@+*#yv5-9dr0-(76_d'
-DEBUG = True
-ALLOWED_HOSTS = []
-env = environ.Env()
-environ.Env.read_env()
+SECRET_KEY = env("DJANGO_SECRET_KEY", default="b+$7gt57sj%w#63ebkrz$n9^0g@+*#yv5-9dr0-(76_d")
+DEBUG = env.bool("DEBUG", default=False)
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+AUTH_USER_MODEL = 'custom_auth.CustomUser'
+DOCKERIZED = env.bool("DOCKERIZED", default=False)
+
 
 # CORS Configuration (Allow frontend domain)
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Local Next.js frontend
-]
-CORS_ALLOW_CREDENTIALS = True  # Allow cookies to be sent
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"])
+CORS_ALLOW_CREDENTIALS = env.bool("CORS_ALLOW_CREDENTIALS", default=True)
+
 
 
 # Application definition
@@ -28,6 +30,7 @@ INSTALLED_APPS = [
     'daphne',  # ASGI Server for WebRTC
     'channels',  # WebSockets support
     'django.contrib.staticfiles',
+    'whitenoise.runserver_nostatic',
     'django.contrib.humanize',
     'rest_framework_gis',
     'django.contrib.gis',
@@ -60,6 +63,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -99,13 +103,13 @@ ASGI_APPLICATION = "core.asgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'azhar_erp_sys',
-        'USER': 'postgres',
-        'HOST': 'localhost',
-        'PASSWORD': 'admin',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": env("POSTGRES_DB", default="azhar_erp_sys"),
+        "USER": env("POSTGRES_USER", default="postgres"),
+        "PASSWORD": env("POSTGRES_PASSWORD", default="admin"),
+        "HOST": "db" if DOCKERIZED else "localhost",  # Use "db" in Docker, "localhost" locally
+        "PORT": env("POSTGRES_PORT", default="5432"),
     }
 }
 
@@ -151,7 +155,21 @@ LOCALE_PATHS = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
+MEDIA_URL = "/media/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")  # Where `collectstatic` collects files
+MEDIA_ROOT = os.path.join(BASE_DIR, "media") # Where uploaded files are stored
+
+# Ensure directories exist
+os.makedirs(STATIC_ROOT, exist_ok=True)
+os.makedirs(MEDIA_ROOT, exist_ok=True)
+
+# Allow serving static files when DEBUG=False
+if not DEBUG:
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -160,6 +178,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Email settings
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.office365.com")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="yourmail@yourdomain.com")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="yourpassword")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="Your Company Name <yourmail@yourdomain.com>")
+EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
+
+# Email Providers (IMAP and SMTP settings)
 EMAIL_PROVIDERS = {
     "gmail": {
         "IMAP_SERVER": "imap.gmail.com",
@@ -214,7 +243,8 @@ REST_FRAMEWORK = {
     },
 
     # Exception Handling (Improved custom exception handler)
-    "EXCEPTION_HANDLER": "myproject.utils.custom_exception_handler",
+    "EXCEPTION_HANDLER": "core.utils.custom_exception_handler",
+
     
     # Content Negotiation (Optional: If supporting multiple content types in future)
     "DEFAULT_CONTENT_NEGOTIATION_CLASS": "rest_framework.negotiation.DefaultContentNegotiation",
@@ -227,7 +257,7 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "AUTH_HEADER_TYPES": ("Bearer",),
-    "COOKIE_SECURE": False,  # Enables Secure Cookie (HTTPS) In Production use True
-    "COOKIE_HTTPONLY": True,  # Prevents JavaScript access to token
-    "COOKIE_SAMESITE": "Lax",  # Prevents CSRF attacks
+    "COOKIE_SECURE": env.bool("COOKIE_SECURE", default=False),  # In production use True
+    "COOKIE_HTTPONLY": True,
+    "COOKIE_SAMESITE": "Lax",
 }

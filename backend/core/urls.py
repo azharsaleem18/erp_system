@@ -10,4 +10,5 @@ admin.sites.AdminSite.index_title = 'BMS Adminpanel'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('auth/', include('custom_auth.urls')),
 ]

@@ -3,7 +3,7 @@
 ## Date: 10-Feb-2025
 
 <style>
-  h1 {
+  h1{
     font-family: "Poppins";
     font-weight: bold;
     color: rgba(0, 128, 0, 1);
@@ -28,25 +28,44 @@
 
 ---
 
-## 📊 Data Table:
+## 📊 Technologies:
 
-| Component          | Technology                           | Purpose                                      |
-|-------------------|-----------------------------------|----------------------------------------------|
-| **Backend API**   | Django Rest Framework (DRF)       | Business Logic                              |
-| **Frontend**      | Next.js (React)                   | User Interface                              |
-| **Database**      | PostgreSQL                        | Storing structured data                     |
-| **Cache**         | Redis                              | Speeding up database queries                |
-| **Message Queue** | Celery + Redis                    | Background tasks (emails, notifications, reports) |
-| **Web Server**    | Nginx OR Traefik                  | Reverse Proxy & Load Balancer               |
-| **App Server**    | Gunicorn + Uvicorn                | Running Django API                          |
-| **Containerization** | Docker + Docker Compose       | Managing environments                       |
-| **Monitoring**    | Flower                            | Celery Task Monitoring                      |
-| **CI/CD**         | GitHub Actions OR GitLab CI/CD    | Automated Deployment                        |
+| Component             | Technology                           | Purpose                                               |
+|----------------------|-----------------------------------|-------------------------------------------------------|
+| Backend API         | Django Rest Framework (DRF)       | Business Logic                                        |
+| Frontend            | Next.js (React)                   | User Interface                                       |
+| Database            | PostgreSQL                        | Storing structured data                              |
+| Cache               | Redis                             | Speeding up database queries                        |
+| Message Queue       | Celery + Redis                    | Background tasks (emails, notifications, reports)   |
+| Web Server          | Nginx OR Traefik                  | Reverse Proxy & Load Balancer                       |
+| App Server          | Gunicorn + Uvicorn                | Running Django API                                  |
+| Containerization    | Docker + Docker Compose          | Managing environments                               |
+| Monitoring          | Flower                            | Celery Task Monitoring                              |
+| CI/CD               | GitHub Actions    | Automated Deployment                                |
+
+## 🔥 Additional Features:
+
+| Feature                   | Why?                                                        |
+|---------------------------|------------------------------------------------------------|
+| django-simple-history     | Tracks model changes (audit logs).                         |
+| django-guardian           | Adds role-based permissions (important for ERP).          |
+| Channels & WebSockets     | Required for real-time features (optional if not needed now). |
+| Nginx + HAProxy           | Load balancing & reverse proxy (needed in production).    |
+| ELK Stack (Logging)       | Monitors logs at scale (set up in production).            |
+| Prometheus + Grafana      | Monitors server & app performance.                         |
+| Redis                     | Improves caching, performance & required for Celery.     |
+| Celery                    | Manages async background tasks.                           |
+| Flower                    | Monitors Celery workers (add when needed).               |
+| Sentry                    | Tracks app errors & sends real-time alerts.              |
+| Django Silk               | API performance profiling (add later for optimization).  |
+| Gunicorn + Uvicorn        | Required for serving Django API & async handling.        |
+| Log Rotation & Retention  | Prevents log overflow in production.                     |
 
 
 
 
-# 📧 Mail Server Protocol
+
+## 📧 Mail Server Protocol
 
 | Feature               | Protocol        | Implementation                                      |
 |-----------------------|----------------|----------------------------------------------------|
