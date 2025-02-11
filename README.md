@@ -2,14 +2,6 @@
 ## Project: Enterprise Business Management System
 ## Date: 10-Feb-2025
 
-<style>
-  h1{
-    font-family: "Poppins";
-    font-weight: bold;
-    color: rgba(0, 128, 0, 1);
-  }
-</style>
-
 ## 🌍 Connect with Me:
 
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px">
